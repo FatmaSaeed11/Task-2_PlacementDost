@@ -17,7 +17,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn import svm
-from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split,cross_val_score, KFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score,precision_score,recall_score,f1_score,confusion_matrix
 
@@ -60,7 +61,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 
 print(X.shape, X_train.shape, X_test.shape)
 
-"""Standard scaler"""
+"""Cross Validation (Standard scaler)"""
 
 scaler = StandardScaler()
 
@@ -78,12 +79,24 @@ model = svm.SVC(kernel='linear')
 
 model.fit(X_train, Y_train)
 
-X_train_prediction = model.predict(X_train)
-training_data_accuracy = accuracy_score(Y_train, X_train_prediction)
+num_folds = 5
+kf = KFold(n_splits=num_folds, shuffle=True, random_state=42)
+
+cross_val_results = cross_val_score(model, X, Y, cv=kf)
 
 """Accuracy"""
 
+print(f'Cross-Validation Results (Accuracy): {cross_val_results}')
+print(f'Mean Accuracy: {cross_val_results.mean()}')
+
+"""Train Accuracy"""
+
+X_train_prediction = model.predict(X_train)
+training_data_accuracy = accuracy_score(Y_train, X_train_prediction)
+
 print('Accuracy score of training data : ', training_data_accuracy)
+
+"""Test Accuracy"""
 
 X_test_prediction = model.predict(X_test)
 test_data_accuracy = accuracy_score(Y_test, X_test_prediction)
@@ -104,7 +117,7 @@ print("precision =",precision)
 print("recall =",recall)
 print("f1 score =",f1)
 
-"""confusion matrix"""
+"""Confusion Matrix"""
 
 conf_matrix = confusion_matrix(Y_pred, Y_test)
 sns.heatmap(conf_matrix,annot=True,fmt='d',cmap='Blues',cbar=False)
